@@ -5,6 +5,7 @@ Coze → 剪映(JianYing) 草稿生成工具
 """
 import json
 import os
+import base64
 import sys
 import time
 import shutil
@@ -26,6 +27,13 @@ JIANYING_DRAFT_ROOT = HOME / "Movies/JianyingPro/User Data/Projects/com.lveditor
 
 DOWNLOAD_TIMEOUT = 30
 USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"
+
+# 画布尺寸（手机竖屏 9:16）
+CANVAS_WIDTH = 1080
+CANVAS_HEIGHT = 1920
+
+# 全白背景（'#RRGGBBAA'）
+BACKGROUND_COLOR = "#FFFFFFFF"
 
 # 从 template/ 复制到新草稿的文件
 TEMPLATE_FILES = [
@@ -53,6 +61,33 @@ EMPTY_DIRS = [
 
 
 # ================= 工具函数 =================
+
+def to_int_us(value, default: int = 0) -> int:
+    """将可能为 int/float/数字字符串(含小数) 的时间统一转为微秒整数。"""
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return int(value)
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float):
+        return int(round(value))
+    if isinstance(value, str):
+        s = value.strip()
+        if not s:
+            return default
+        try:
+            return int(s)
+        except ValueError:
+            try:
+                return int(round(float(s)))
+            except ValueError:
+                return default
+    try:
+        return int(round(float(value)))
+    except Exception:
+        return default
+
 
 def safe_parse(data):
     """处理可能被字符串化的 JSON 字段"""
@@ -82,6 +117,36 @@ def download(url, save_path):
     except Exception as e:
         print(f"  下载失败: {e}")
     return False
+
+
+_WHITE_1X1_PNG_B64 = (
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMA"
+    "ASsJTYQAAAAASUVORK5CYII="
+)
+
+
+def ensure_white_png(path: Path) -> Path:
+    """创建一个白底 1x1 PNG 占位图（若不存在）。"""
+    path = Path(path)
+    if path.exists() and path.stat().st_size > 0:
+        return path
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "wb") as f:
+        f.write(base64.b64decode(_WHITE_1X1_PNG_B64))
+    return path
+
+
+def ensure_copy(src: Path, dst: Path) -> bool:
+    """将 src 复制到 dst（dst 不存在/为空时），返回是否成功。"""
+    src = Path(src)
+    dst = Path(dst)
+    if dst.exists() and dst.stat().st_size > 0:
+        return True
+    if not src.exists() or src.stat().st_size <= 0:
+        return False
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(str(src), str(dst))
+    return dst.exists() and dst.stat().st_size > 0
 
 
 def _srt_time(us):
@@ -173,16 +238,51 @@ def main():
     downloaded_images = []
     if images:
         print(f"下载 {len(images)} 张图片...")
+        # bg_image 作为首张兜底（如果第一张图失败/缺失）
+        bg_list = safe_parse(data.get("bg_image", []))
+        bg_local = None
+        if isinstance(bg_list, list) and bg_list:
+            bg_url = (bg_list[0] or {}).get("image_url", "")
+            if bg_url:
+                candidate = materials_dir / "bg_fallback.png"
+                if download(bg_url, candidate):
+                    bg_local = candidate
+
+        placeholder_local = ensure_white_png(materials_dir / "placeholder.png")
+        prev_ok_local = None
+
         for i, img in enumerate(images):
             url = img.get("image_url", "")
-            if not url:
-                continue
             local = materials_dir / f"image_{i}.png"
-            if download(url, local):
+            ok = False
+            if url:
+                ok = download(url, local)
+
+            if ok:
                 print(f"  [{i+1}/{len(images)}] OK")
-                downloaded_images.append((i, img, local))
+                prev_ok_local = local
             else:
-                print(f"  [{i+1}/{len(images)}] FAIL - 跳过")
+                # 兜底策略：上一张成功图 > bg_image > 白底占位图
+                if not url:
+                    reason = "empty image_url"
+                else:
+                    reason = "download failed"
+
+                fallback_src = prev_ok_local or bg_local or placeholder_local
+                fallback_label = (
+                    "prev_image" if prev_ok_local else
+                    ("bg_image" if bg_local else "placeholder")
+                )
+
+                if ensure_copy(fallback_src, local):
+                    print(f"  [{i+1}/{len(images)}] FALLBACK ({reason}) -> {fallback_label}")
+                else:
+                    # 极端情况：兜底源也不可用，则强制写占位图到 local
+                    ensure_white_png(local)
+                    print(f"  [{i+1}/{len(images)}] FALLBACK ({reason}) -> placeholder (forced)")
+
+            # 不管是否成功下载，都保持时间轴段数一致
+            downloaded_images.append((i, img, local))
 
     downloaded_audios = []
     if audios:
@@ -190,6 +290,7 @@ def main():
         for i, aud in enumerate(audios):
             url = aud.get("audio_url", "")
             if not url:
+                print(f"  [{i+1}/{len(audios)}] SKIP - empty audio_url")
                 continue
             local = materials_dir / f"audio_{i}.mp3"
             if download(url, local):
@@ -199,7 +300,7 @@ def main():
                 print(f"  [{i+1}/{len(audios)}] FAIL - 跳过")
 
     # ─── 7. 构建 draft_content.json ───
-    script = ScriptFile(1920, 1080)
+    script = ScriptFile(CANVAS_WIDTH, CANVAS_HEIGHT)
 
     # 加载平台格式配置
     platform_config = load_platform_config()
@@ -221,20 +322,25 @@ def main():
     if downloaded_images:
         script.add_track(draft.TrackType.video, "images")
         for i, img, local in downloaded_images:
-            start = int(img.get("start", 0))
-            end = int(img.get("end", 0))
+            start = to_int_us(img.get("start", 0))
+            end = to_int_us(img.get("end", 0))
             duration = end - start if end > start else 3000000
             seg = draft.VideoSegment(str(local), trange(start, duration))
+            # 白色背景填充：竖屏画布下更自然（避免黑边）
+            try:
+                seg.add_background_filling("color", blur=0.0, color=BACKGROUND_COLOR)
+            except Exception:
+                pass
             script.add_segment(seg, "images")
 
     # ─── 9. 添加音频轨道 ───
     if downloaded_audios:
         script.add_track(draft.TrackType.audio, "audios")
         for i, aud, local in downloaded_audios:
-            start = int(aud.get("start", 0))
-            duration = int(aud.get("duration", 0))
+            start = to_int_us(aud.get("start", 0))
+            duration = to_int_us(aud.get("duration", 0))
             if duration <= 0:
-                end = int(aud.get("end", 0))
+                end = to_int_us(aud.get("end", 0))
                 duration = end - start if end > start else 3000000
             seg = draft.AudioSegment(str(local), trange(start, duration))
             script.add_segment(seg, "audios")
@@ -246,7 +352,8 @@ def main():
             for i, text in enumerate(captions):
                 if i < len(text_timelines):
                     t = text_timelines[i]
-                    s, e = int(t["start"]), int(t["end"])
+                    s = to_int_us(t.get("start", 0))
+                    e = to_int_us(t.get("end", 0))
                     f.write(f"{i+1}\n")
                     f.write(f"{_srt_time(s)} --> {_srt_time(e)}\n")
                     f.write(f"{text}\n\n")
