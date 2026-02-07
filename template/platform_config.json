@@ -1,0 +1,27 @@
+{
+  "platform": {
+    "app_id": 3704,
+    "app_source": "lv",
+    "app_version": "5.9.0",
+    "device_id": "9d624d7e23dc4e43a0ed4020b8e3e90e",
+    "hard_disk_id": "f242a67014ec01ecdc2a9280da37adb1",
+    "mac_address": "0c233adaa327abd93e3d6b5dae6d75e2",
+    "os": "mac",
+    "os_version": "14.5"
+  },
+  "last_modified_platform": {
+    "app_id": 3704,
+    "app_source": "cc",
+    "app_version": "5.9.0",
+    "device_id": "9d624d7e23dc4e43a0ed4020b8e3e90e",
+    "hard_disk_id": "f242a67014ec01ecdc2a9280da37adb1",
+    "mac_address": "0c233adaa327abd93e3d6b5dae6d75e2",
+    "os": "mac",
+    "os_version": "14.5"
+  },
+  "color_space": -1,
+  "render_index_track_mode_on": true,
+  "lyrics_effects": [],
+  "is_drop_frame_timecode": false,
+  "path": ""
+}

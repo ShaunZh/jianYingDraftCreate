@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Coze → 剪映(JianYing) 草稿生成工具
-核心策略: 从可用草稿中只复制辅助/格式文件, draft_content.json 完全重新生成
+完全自包含: 所有模板文件保存在 ./template/ 目录中, 不依赖外部草稿
 """
 import json
 import os
@@ -18,28 +18,27 @@ from pyJianYingDraft.script_file import ScriptFile
 
 # ================= 配置 =================
 HOME = Path.home()
-JIANYING_DRAFT_ROOT = HOME / "Movies/JianyingPro/User Data/Projects/com.lveditor.draft"
+SCRIPT_DIR = Path(__file__).parent.resolve()
+TEMPLATE_DIR = SCRIPT_DIR / "template"
 
-# 已知可用的模板草稿 (用于提取 platform 等格式信息, 以及 draft_meta_info.json)
-TEMPLATE_DRAFT_NAME = "dcdc02af-9f25-46c7-af1a-ac4bf2cf3af9"
+# 剪映(中国内地版)草稿路径
+JIANYING_DRAFT_ROOT = HOME / "Movies/JianyingPro/User Data/Projects/com.lveditor.draft"
 
 DOWNLOAD_TIMEOUT = 30
 USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"
 
-# 只从模板复制这些文件/目录 (不复制包含旧内容数据的文件)
-COPY_FILES = [
-    "draft_meta_info.json",         # 加密的元信息, 让剪映能识别草稿
-    "draft_cover.jpg",              # 封面图
-    "draft_local_cover.jpg",        # 本地封面图
-    "draft_biz_config.json",        # 业务配置
-    "draft_agency_config.json",     # 代理配置
-    "draft_virtual_store.json",     # 虚拟存储
-    "performance_opt_info.json",    # 性能优化信息
-    "attachment_editing.json",      # 编辑附件
-    "attachment_pc_common.json",    # PC通用附件
-]
-COPY_DIRS = [
+# 从 template/ 复制到新草稿的文件
+TEMPLATE_FILES = [
+    "draft_meta_info.json",
+    "draft_biz_config.json",
+    "draft_agency_config.json",
+    "draft_virtual_store.json",
+    "performance_opt_info.json",
+    "attachment_editing.json",
+    "attachment_pc_common.json",
     "draft_settings",
+]
+TEMPLATE_DIRS = [
     "common_attachment",
 ]
 # 创建这些空目录 (剪映可能需要它们存在)
@@ -94,19 +93,19 @@ def _srt_time(us):
     return f"{h:02}:{m:02}:{s:02},{ms:03}"
 
 
-def copy_template_files(template_path, project_path):
-    """从模板草稿中只复制辅助文件, 不复制任何内容数据"""
+def setup_project(project_path):
+    """从本地 template/ 目录初始化新草稿项目"""
     project_path.mkdir(parents=True, exist_ok=True)
 
-    # 复制单个文件
-    for fn in COPY_FILES:
-        src = template_path / fn
+    # 复制模板文件
+    for fn in TEMPLATE_FILES:
+        src = TEMPLATE_DIR / fn
         if src.exists():
             shutil.copy2(str(src), str(project_path / fn))
 
-    # 复制目录
-    for dn in COPY_DIRS:
-        src = template_path / dn
+    # 复制模板目录
+    for dn in TEMPLATE_DIRS:
+        src = TEMPLATE_DIR / dn
         if src.exists():
             dst = project_path / dn
             if src.is_dir():
@@ -119,10 +118,25 @@ def copy_template_files(template_path, project_path):
         (project_path / dn).mkdir(parents=True, exist_ok=True)
 
 
+def load_platform_config():
+    """从 template/platform_config.json 加载平台格式字段"""
+    config_path = TEMPLATE_DIR / "platform_config.json"
+    if not config_path.exists():
+        raise FileNotFoundError(f"缺少配置文件: {config_path}")
+    with open(config_path, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
 # ================= 主逻辑 =================
 
 def main():
-    # ─── 1. 读取输入 ───
+    # ─── 1. 检查 template/ 目录 ───
+    if not TEMPLATE_DIR.exists():
+        print(f"错误: 模板目录不存在: {TEMPLATE_DIR}")
+        print("请确保 template/ 目录包含必要的模板文件")
+        return
+
+    # ─── 2. 读取输入 ───
     print("请粘贴 Coze JSON 数据, 按 Ctrl+D (macOS) 结束:")
     raw = sys.stdin.read().strip()
     if not raw:
@@ -131,7 +145,7 @@ def main():
 
     data = json.loads(raw)
 
-    # ─── 2. 解析字段 ───
+    # ─── 3. 解析字段 ───
     images = safe_parse(data.get("image_list", []))
     audios = safe_parse(data.get("audio_list", []))
     captions = data.get("text_cap", [])
@@ -139,26 +153,20 @@ def main():
 
     print(f"解析完成: {len(images)} 图片, {len(audios)} 音频, {len(captions)} 字幕")
 
-    # ─── 3. 检查环境 ───
+    # ─── 4. 检查剪映草稿目录 ───
     if not JIANYING_DRAFT_ROOT.exists():
         print(f"错误: 剪映草稿目录不存在: {JIANYING_DRAFT_ROOT}")
         return
 
-    template_path = JIANYING_DRAFT_ROOT / TEMPLATE_DRAFT_NAME
-    template_content_path = template_path / "draft_content.json"
-    if not template_path.exists() or not template_content_path.exists():
-        print(f"错误: 模板草稿不存在或缺少 draft_content.json: {template_path}")
-        return
-
-    # ─── 4. 创建新草稿目录 (只复制辅助文件, 不复制内容数据) ───
+    # ─── 5. 在临时目录中准备草稿 (避免剪映监控到不完整的草稿而删除) ───
     project_name = f"Coze_{int(time.time())}"
-    project_path = JIANYING_DRAFT_ROOT / project_name
+    # 先在项目目录下的 temp/ 中构建, 最后整体移入剪映草稿目录
+    project_path = SCRIPT_DIR / "temp" / project_name
 
     print(f"创建草稿: {project_name}")
-    copy_template_files(template_path, project_path)
-    print("  已复制模板辅助文件 (不含旧内容数据)")
+    setup_project(project_path)
 
-    # ─── 5. 创建素材目录并下载 ───
+    # ─── 6. 下载素材 ───
     materials_dir = project_path / "materials"
     materials_dir.mkdir(parents=True, exist_ok=True)
 
@@ -190,22 +198,13 @@ def main():
             else:
                 print(f"  [{i+1}/{len(audios)}] FAIL - 跳过")
 
-    # ─── 6. 用 pyJianYingDraft 构建 draft_content.json ───
-    # 创建 ScriptFile, 然后用模板的 content 做基底 (继承 platform 等字段)
+    # ─── 7. 构建 draft_content.json ───
     script = ScriptFile(1920, 1080)
 
-    # 读取模板的 draft_content.json, 提取关键格式字段
-    with open(template_content_path, "r", encoding="utf-8") as f:
-        template_content = json.load(f)
-
-    # 将模板的关键字段合并到 pyJianYingDraft 的默认 content 中
-    script.content["platform"] = template_content["platform"]
-    script.content["last_modified_platform"] = template_content["last_modified_platform"]
-    script.content["color_space"] = template_content.get("color_space", -1)
-    script.content["render_index_track_mode_on"] = template_content.get("render_index_track_mode_on", True)
-    for key in ["lyrics_effects", "is_drop_frame_timecode", "path"]:
-        if key in template_content:
-            script.content[key] = template_content[key]
+    # 加载平台格式配置
+    platform_config = load_platform_config()
+    for key, value in platform_config.items():
+        script.content[key] = value
 
     # 设置新的 ID 和时间戳
     new_content_id = str(uuid.uuid4())
@@ -218,7 +217,7 @@ def main():
     script.save_path = str(draft_content_file)
     script.duration = 0
 
-    # ─── 7. 添加视频轨道和片段 ───
+    # ─── 8. 添加视频轨道 ───
     if downloaded_images:
         script.add_track(draft.TrackType.video, "images")
         for i, img, local in downloaded_images:
@@ -228,7 +227,7 @@ def main():
             seg = draft.VideoSegment(str(local), trange(start, duration))
             script.add_segment(seg, "images")
 
-    # ─── 8. 添加音频轨道和片段 ───
+    # ─── 9. 添加音频轨道 ───
     if downloaded_audios:
         script.add_track(draft.TrackType.audio, "audios")
         for i, aud, local in downloaded_audios:
@@ -240,7 +239,7 @@ def main():
             seg = draft.AudioSegment(str(local), trange(start, duration))
             script.add_segment(seg, "audios")
 
-    # ─── 9. 生成字幕并导入到草稿 ───
+    # ─── 10. 生成字幕并导入 ───
     if captions and text_timelines:
         srt_path = project_path / "captions.srt"
         with open(srt_path, "w", encoding="utf-8") as f:
@@ -251,21 +250,16 @@ def main():
                     f.write(f"{i+1}\n")
                     f.write(f"{_srt_time(s)} --> {_srt_time(e)}\n")
                     f.write(f"{text}\n\n")
-        print(f"字幕文件: captions.srt ({len(captions)} 条)")
-
-        # 使用 pyJianYingDraft 的 import_srt 将字幕导入到文本轨道
+        print(f"字幕: {len(captions)} 条")
         script.import_srt(str(srt_path), "subtitles")
-        print(f"  已导入字幕到文本轨道 ({len(captions)} 条)")
 
-    # ─── 10. 保存 ───
+    # ─── 11. 保存 draft_content.json ───
     script.save()
-    print("draft_content.json 已生成")
 
-    # ─── 11. 生成 draft_info.json (剪映必需, 用 draft_content.json 的内容) ───
+    # ─── 12. 生成 draft_info.json (剪映必需) ───
     shutil.copy2(str(draft_content_file), str(project_path / "draft_info.json"))
-    print("draft_info.json 已生成")
 
-    # ─── 12. 写 timeline_layout.json ───
+    # ─── 13. 写 timeline_layout.json ───
     timeline_layout = {
         "dockItems": [{
             "dockIndex": 0,
@@ -278,7 +272,29 @@ def main():
     with open(project_path / "timeline_layout.json", "w", encoding="utf-8") as f:
         json.dump(timeline_layout, f, ensure_ascii=False, indent=2)
 
-    # ─── 13. 验证 ───
+    # ─── 14. 将完整草稿移入剪映草稿目录 ───
+    final_path = JIANYING_DRAFT_ROOT / project_name
+    if final_path.exists():
+        shutil.rmtree(str(final_path))
+    shutil.move(str(project_path), str(final_path))
+
+    # 修复路径: 将 draft_content.json 和 draft_info.json 中的临时路径替换为最终路径
+    temp_prefix = str(project_path)
+    final_prefix = str(final_path)
+    for json_file in ["draft_content.json", "draft_info.json"]:
+        fp = final_path / json_file
+        if fp.exists():
+            with open(fp, "r", encoding="utf-8") as f:
+                text = f.read()
+            text = text.replace(temp_prefix, final_prefix)
+            with open(fp, "w", encoding="utf-8") as f:
+                f.write(text)
+
+    project_path = final_path
+    draft_content_file = project_path / "draft_content.json"
+    print(f"已移入剪映草稿目录")
+
+    # ─── 15. 验证 ───
     print(f"\n验证:")
     with open(draft_content_file, "r") as f:
         dc = json.load(f)
@@ -290,9 +306,6 @@ def main():
     print(f"  videos: {len(dc['materials']['videos'])}")
     print(f"  audios: {len(dc['materials']['audios'])}")
     print(f"  texts: {len(dc['materials']['texts'])}")
-    if dc['materials']['videos']:
-        p = dc['materials']['videos'][0]['path']
-        print(f"  首个视频路径: {p}")
 
     print(f"\n草稿已保存到: {project_path}")
     print(f"请打开【剪映】查找草稿: {project_name}")
