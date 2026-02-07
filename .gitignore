@@ -36,8 +36,7 @@ debug.log
 *.log
 test_output/
 
-# 不提交实际的数据文件
-data.json
+# 测试数据
 test_data/
 
 # 临时文件
