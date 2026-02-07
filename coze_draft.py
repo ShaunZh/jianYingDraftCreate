@@ -16,6 +16,7 @@ from pathlib import Path
 import pyJianYingDraft as draft
 from pyJianYingDraft import trange
 from pyJianYingDraft.script_file import ScriptFile
+from pyJianYingDraft.text_segment import TextStyle, TextBorder, TextShadow, TextSegment
 
 # ================= 配置 =================
 HOME = Path.home()
@@ -34,6 +35,21 @@ CANVAS_HEIGHT = 1920
 
 # 全白背景（'#RRGGBBAA'）
 BACKGROUND_COLOR = "#FFFFFFFF"
+
+# 字幕样式（尽量贴近你截图里的蓝色描边效果）
+SUBTITLE_FONT_SIZE = 8.0
+# 字体填充色：浅蓝（RGB 0~1）
+SUBTITLE_FILL_RGB = (0.60, 0.87, 1.00)
+# 描边：白色
+SUBTITLE_BORDER_RGB = (1.00, 1.00, 1.00)
+# 描边宽度（0~100，值越大边越粗）
+SUBTITLE_BORDER_WIDTH = 55.0
+# 阴影（可选：更接近“预设”观感；不想要可将 SUBTITLE_SHADOW_ALPHA 设为 0）
+SUBTITLE_SHADOW_ALPHA = 0.35
+SUBTITLE_SHADOW_RGB = (0.00, 0.00, 0.00)
+SUBTITLE_SHADOW_DIFFUSE = 18.0
+SUBTITLE_SHADOW_DISTANCE = 6.0
+SUBTITLE_SHADOW_ANGLE = -45.0
 
 # 从 template/ 复制到新草稿的文件
 TEMPLATE_FILES = [
@@ -358,7 +374,30 @@ def main():
                     f.write(f"{_srt_time(s)} --> {_srt_time(e)}\n")
                     f.write(f"{text}\n\n")
         print(f"字幕: {len(captions)} 条")
-        script.import_srt(str(srt_path), "subtitles")
+        # 构造一个“样式模板”，让导入的每条字幕继承该样式
+        style_ref = TextSegment(
+            "template",
+            trange(0, 1_000_000),
+            style=TextStyle(
+                size=SUBTITLE_FONT_SIZE,
+                align=1,  # 居中
+                auto_wrapping=True,
+                color=SUBTITLE_FILL_RGB,
+            ),
+            border=TextBorder(
+                alpha=1.0,
+                color=SUBTITLE_BORDER_RGB,
+                width=SUBTITLE_BORDER_WIDTH,
+            ),
+            shadow=TextShadow(
+                alpha=SUBTITLE_SHADOW_ALPHA,
+                color=SUBTITLE_SHADOW_RGB,
+                diffuse=SUBTITLE_SHADOW_DIFFUSE,
+                distance=SUBTITLE_SHADOW_DISTANCE,
+                angle=SUBTITLE_SHADOW_ANGLE,
+            ) if SUBTITLE_SHADOW_ALPHA > 0 else None,
+        )
+        script.import_srt(str(srt_path), "subtitles", style_reference=style_ref)
 
     # ─── 11. 保存 draft_content.json ───
     script.save()
