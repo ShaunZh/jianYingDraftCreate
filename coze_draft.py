@@ -174,6 +174,73 @@ def _srt_time(us):
     return f"{h:02}:{m:02}:{s:02},{ms:03}"
 
 
+def sanitize_filename(name: str, max_length: int = 200) -> str:
+    """
+    清理文件名/目录名中的非法字符，确保符合 macOS 和剪映要求。
+    
+    macOS 限制:
+    - 不能包含 `/` (路径分隔符)
+    - 不能包含 `:` (虽然技术上可以，但会被系统转换为 `/`)
+    - 总长度不超过 255 字节
+    
+    剪映草稿命名建议:
+    - 避免特殊字符 `<>:"|?*\` 等
+    - 保持可读性
+    """
+    if not name:
+        return "untitled"
+    
+    # 替换/删除非法字符
+    illegal_chars = {
+        '/': '-',   # macOS 路径分隔符
+        ':': '-',   # macOS 特殊字符
+        '<': '《',  # 全角替换，保持可读性
+        '>': '》',
+        '"': "'",   # 单引号替换双引号
+        '|': '-',
+        '?': '？',  # 全角问号
+        '*': '✱',
+        '\\': '-',
+        '\n': ' ',  # 换行替换为空格
+        '\r': ' ',
+        '\t': ' ',
+    }
+    
+    for char, replacement in illegal_chars.items():
+        name = name.replace(char, replacement)
+    
+    # 移除首尾空格和点号（macOS 不建议）
+    name = name.strip('. ')
+    
+    # 限制长度（UTF-8 编码，macOS 限制 255 字节）
+    while len(name.encode('utf-8')) > max_length:
+        name = name[:-1]
+    
+    return name or "untitled"
+
+
+def generate_draft_title(data: dict) -> str:
+    """
+    从 Coze JSON 数据生成草稿标题。
+    格式: [topic~hook_type~output_language~时间戳]
+    """
+    topic = data.get("topic", "").strip()
+    hook_type = data.get("hook_type", "").strip()
+    output_language = data.get("output_language", "").strip()
+    timestamp = int(time.time())
+    
+    # 清理每个字段
+    topic_clean = sanitize_filename(topic, max_length=80) if topic else "untitled"
+    hook_type_clean = sanitize_filename(hook_type, max_length=30) if hook_type else "unknown"
+    lang_clean = sanitize_filename(output_language, max_length=10) if output_language else "unknown"
+    
+    # 拼接标题
+    title = f"{topic_clean}~{hook_type_clean}~{lang_clean}~{timestamp}"
+    
+    # 最终保险：再次清理并限制总长度
+    return sanitize_filename(title, max_length=200)
+
+
 def setup_project(project_path):
     """从本地 template/ 目录初始化新草稿项目"""
     project_path.mkdir(parents=True, exist_ok=True)
@@ -240,7 +307,7 @@ def main():
         return
 
     # ─── 5. 在临时目录中准备草稿 (避免剪映监控到不完整的草稿而删除) ───
-    project_name = f"Coze_{int(time.time())}"
+    project_name = generate_draft_title(data)
     # 先在项目目录下的 temp/ 中构建, 最后整体移入剪映草稿目录
     project_path = SCRIPT_DIR / "temp" / project_name
 
