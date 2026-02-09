@@ -10,6 +10,7 @@ import sys
 import time
 import shutil
 import uuid
+import hashlib
 import requests
 from pathlib import Path
 
@@ -22,6 +23,9 @@ from pyJianYingDraft.text_segment import TextStyle, TextBorder, TextShadow, Text
 HOME = Path.home()
 SCRIPT_DIR = Path(__file__).parent.resolve()
 TEMPLATE_DIR = SCRIPT_DIR / "template"
+
+# 全局媒体缓存目录（避免重复下载相同 URL 的资源）
+CACHE_DIR = SCRIPT_DIR / "coze_cache" / "media"
 
 # 剪映(中国内地版)草稿路径
 JIANYING_DRAFT_ROOT = HOME / "Movies/JianyingPro/User Data/Projects/com.lveditor.draft"
@@ -117,22 +121,98 @@ def safe_parse(data):
     return []
 
 
-def download(url, save_path):
-    """下载文件, 返回是否成功"""
-    save_path = Path(save_path)
-    if save_path.exists() and save_path.stat().st_size > 0:
-        return True
+def url_to_cache_key(url: str) -> str:
+    """
+    URL → 缓存文件名（使用 MD5 hash 避免文件名冲突和非法字符）
+    """
+    return hashlib.md5(url.encode('utf-8')).hexdigest()
+
+
+def get_cached_or_download(url: str, target_path: Path, file_type: str = "media") -> tuple[bool, str]:
+    """
+    智能下载：先检查全局缓存，存在则复制，不存在则下载并缓存。
+    
+    Args:
+        url: 资源 URL
+        target_path: 目标保存路径（草稿 materials/ 目录下）
+        file_type: 文件类型（用于确定扩展名，如 "png", "mp3"）
+    
+    Returns:
+        (是否成功, 状态信息: "cached"/"downloaded"/"failed")
+    """
+    target_path = Path(target_path)
+    
+    # 如果目标已存在且有效，直接返回
+    if target_path.exists() and target_path.stat().st_size > 0:
+        return True, "exists"
+    
+    if not url:
+        return False, "empty_url"
+    
+    # 确保缓存目录存在
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    
+    # 推断扩展名
+    if not file_type or file_type == "media":
+        # 从 URL 或目标路径推断
+        if target_path.suffix:
+            ext = target_path.suffix
+        else:
+            ext = ".dat"
+    else:
+        ext = f".{file_type.lstrip('.')}"
+    
+    # 缓存文件路径
+    cache_key = url_to_cache_key(url)
+    cache_path = CACHE_DIR / f"{cache_key}{ext}"
+    
+    # 步骤 1: 检查缓存是否存在
+    if cache_path.exists() and cache_path.stat().st_size > 0:
+        # 从缓存复制到目标
+        try:
+            target_path.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(str(cache_path), str(target_path))
+            if target_path.exists() and target_path.stat().st_size > 0:
+                return True, "cached"
+            return False, "copy_failed"
+        except Exception as e:
+            print(f"  缓存复制失败: {e}")
+            return False, "copy_failed"
+    
+    # 步骤 2: 缓存不存在，下载到缓存
     try:
         r = requests.get(url, headers={"User-Agent": USER_AGENT},
                          stream=True, timeout=DOWNLOAD_TIMEOUT, allow_redirects=True)
         if r.status_code == 200:
-            with open(save_path, "wb") as f:
+            with open(cache_path, "wb") as f:
                 for chunk in r.iter_content(8192):
                     f.write(chunk)
-            return save_path.exists() and save_path.stat().st_size > 0
+            
+            # 验证下载成功
+            if not (cache_path.exists() and cache_path.stat().st_size > 0):
+                return False, "download_failed"
+            
+            # 步骤 3: 从缓存复制到目标
+            target_path.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(str(cache_path), str(target_path))
+            if target_path.exists() and target_path.stat().st_size > 0:
+                return True, "downloaded"
+            return False, "copy_failed"
     except Exception as e:
         print(f"  下载失败: {e}")
-    return False
+        return False, "download_failed"
+    
+    return False, "unknown_error"
+
+
+def download(url, save_path):
+    """下载文件, 返回是否成功（保留兼容性，内部调用缓存机制）"""
+    save_path = Path(save_path)
+    
+    # 从文件扩展名推断类型
+    ext = save_path.suffix.lstrip('.')
+    success, status = get_cached_or_download(url, save_path, file_type=ext)
+    return success
 
 
 _WHITE_1X1_PNG_B64 = (
@@ -320,7 +400,7 @@ def main():
 
     downloaded_images = []
     if images:
-        print(f"下载 {len(images)} 张图片...")
+        print(f"获取 {len(images)} 张图片...")
         # bg_image 作为首张兜底（如果第一张图失败/缺失）
         bg_list = safe_parse(data.get("bg_image", []))
         bg_local = None
@@ -328,21 +408,35 @@ def main():
             bg_url = (bg_list[0] or {}).get("image_url", "")
             if bg_url:
                 candidate = materials_dir / "bg_fallback.png"
-                if download(bg_url, candidate):
+                ok, status = get_cached_or_download(bg_url, candidate, "png")
+                if ok:
                     bg_local = candidate
 
         placeholder_local = ensure_white_png(materials_dir / "placeholder.png")
         prev_ok_local = None
+        
+        cached_count = 0
+        downloaded_count = 0
 
         for i, img in enumerate(images):
             url = img.get("image_url", "")
             local = materials_dir / f"image_{i}.png"
             ok = False
+            status_msg = ""
+            
             if url:
-                ok = download(url, local)
+                ok, status = get_cached_or_download(url, local, "png")
+                if status == "cached":
+                    cached_count += 1
+                    status_msg = "CACHED"
+                elif status == "downloaded":
+                    downloaded_count += 1
+                    status_msg = "OK"
+                else:
+                    status_msg = "FAIL"
 
             if ok:
-                print(f"  [{i+1}/{len(images)}] OK")
+                print(f"  [{i+1}/{len(images)}] {status_msg}")
                 prev_ok_local = local
             else:
                 # 兜底策略：上一张成功图 > bg_image > 白底占位图
@@ -366,21 +460,39 @@ def main():
 
             # 不管是否成功下载，都保持时间轴段数一致
             downloaded_images.append((i, img, local))
+        
+        print(f"  统计: {cached_count} 缓存 / {downloaded_count} 下载 / {len(images) - cached_count - downloaded_count} 兜底")
 
     downloaded_audios = []
     if audios:
-        print(f"下载 {len(audios)} 段音频...")
+        print(f"获取 {len(audios)} 段音频...")
+        
+        cached_count = 0
+        downloaded_count = 0
+        
         for i, aud in enumerate(audios):
             url = aud.get("audio_url", "")
             if not url:
                 print(f"  [{i+1}/{len(audios)}] SKIP - empty audio_url")
                 continue
             local = materials_dir / f"audio_{i}.mp3"
-            if download(url, local):
-                print(f"  [{i+1}/{len(audios)}] OK")
+            ok, status = get_cached_or_download(url, local, "mp3")
+            
+            if ok:
+                if status == "cached":
+                    cached_count += 1
+                    print(f"  [{i+1}/{len(audios)}] CACHED")
+                elif status == "downloaded":
+                    downloaded_count += 1
+                    print(f"  [{i+1}/{len(audios)}] OK")
+                else:
+                    print(f"  [{i+1}/{len(audios)}] OK")
                 downloaded_audios.append((i, aud, local))
             else:
                 print(f"  [{i+1}/{len(audios)}] FAIL - 跳过")
+        
+        if audios:
+            print(f"  统计: {cached_count} 缓存 / {downloaded_count} 下载")
 
     # ─── 7. 构建 draft_content.json ───
     script = ScriptFile(CANVAS_WIDTH, CANVAS_HEIGHT)

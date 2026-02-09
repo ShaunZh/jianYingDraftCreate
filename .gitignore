@@ -43,3 +43,6 @@ test_data/
 *.tmp
 temp/
 .DS_Store
+
+# 资源文件
+coze_cache/

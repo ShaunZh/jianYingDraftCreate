@@ -1,0 +1,96 @@
+{
+    "audio_list": "[{\"audio_url\":\"https://lf3-appstore-sign.oceancloudapi.com/ocean-cloud-tos/VolcanoUserVoice/speech_7426725529589596187_042caccc-e2fa-4d44-b24a-4fa74a5ec81d.mp3?lk3s=da27ec82&x-expires=1770711654&x-signature=s4WvYf8a641wwfeCymjCawSKD7A%3D\",\"duration\":3048000,\"start\":0,\"end\":3048000,\"audio_effect\":\"叠加\"},{\"audio_url\":\"https://lf3-appstore-sign.oceancloudapi.com/ocean-cloud-tos/VolcanoUserVoice/speech_7426725529589596187_7c42ade9-f206-4ddc-be14-35b4685482ce.mp3?lk3s=da27ec82&x-expires=1770711655&x-signature=qANjCD2ButFKyRGezA%2FJITnqWg0%3D\",\"duration\":2568000,\"start\":3048000,\"end\":5616000,\"audio_effect\":\"叠加\"},{\"audio_url\":\"https://lf3-appstore-sign.oceancloudapi.com/ocean-cloud-tos/VolcanoUserVoice/speech_7426725529589596187_e83c8d95-b080-4ba1-a342-8fc5b37b81f2.mp3?lk3s=da27ec82&x-expires=1770711656&x-signature=RNoWtX3FPe69PmLuhdqFi9z57Ew%3D\",\"duration\":2496000,\"start\":5616000,\"end\":8112000,\"audio_effect\":\"叠加\"},{\"audio_url\":\"https://lf26-appstore-sign.oceancloudapi.com/ocean-cloud-tos/VolcanoUserVoice/speech_7426725529589596187_8cc09960-acdb-446b-a310-ed588acb0838.mp3?lk3s=da27ec82&x-expires=1770711657&x-signature=UC2uiePgjrDzZweDMbf3StdoFik%3D\",\"duration\":2496000,\"start\":8112000,\"end\":10608000,\"audio_effect\":\"叠加\"},{\"audio_url\":\"https://lf3-appstore-sign.oceancloudapi.com/ocean-cloud-tos/VolcanoUserVoice/speech_7426725529589596187_abc1958d-b9c2-4d0f-b533-e06f31bf157f.mp3?lk3s=da27ec82&x-expires=1770711658&x-signature=pxPqXmSEA87Uu4a4YGRfraFaDAA%3D\",\"duration\":2400000,\"start\":10608000,\"end\":13008000,\"audio_effect\":\"叠加\"},{\"audio_url\":\"https://lf6-appstore-sign.oceancloudapi.com/ocean-cloud-tos/VolcanoUserVoice/speech_7426725529589596187_ed58a85b-51c9-455c-a25f-f63df7a93903.mp3?lk3s=da27ec82&x-expires=1770711661&x-signature=9NgRX7LcTwptRDa1L0RaQidT0WE%3D\",\"duration\":2616000,\"start\":13008000,\"end\":15624000,\"audio_effect\":\"叠加\"},{\"audio_url\":\"https://lf9-appstore-sign.oceancloudapi.com/ocean-cloud-tos/VolcanoUserVoice/speech_7426725529589596187_01ec22e5-139e-4c3e-885a-9e1c8ba2cfc9.mp3?lk3s=da27ec82&x-expires=1770711662&x-signature=njFJtov2Z0kUPUzl0k52mZmekMI%3D\",\"duration\":2184000,\"start\":15624000,\"end\":17808000,\"audio_effect\":\"叠加\"},{\"audio_url\":\"https://lf6-appstore-sign.oceancloudapi.com/ocean-cloud-tos/VolcanoUserVoice/speech_7426725529589596187_f81c3a84-31bd-4a20-8098-152362f30d1e.mp3?lk3s=da27ec82&x-expires=1770711663&x-signature=aArdgC0vVpJ1gV9NPohigEQ7EC8%3D\",\"duration\":2784000,\"start\":17808000,\"end\":20592000,\"audio_effect\":\"叠加\"},{\"audio_url\":\"https://lf9-appstore-sign.oceancloudapi.com/ocean-cloud-tos/VolcanoUserVoice/speech_7426725529589596187_2782323a-b21c-4c24-9795-76cb957d06dc.mp3?lk3s=da27ec82&x-expires=1770711665&x-signature=GHbRZm3ls3Cd%2FSIkmFRl6%2F8mU14%3D\",\"duration\":3000000,\"start\":20592000,\"end\":23592000,\"audio_effect\":\"叠加\"}]",
+    "bg_image": "[{\"image_url\":\"https://p26-bot-workflow-sign.byteimg.com/tos-cn-i-mdko3gqilj/401ae579b51c4364890269d79af2b757.png~tplv-mdko3gqilj-image.png?rk3s=c8fe7ad5&x-expires=1801556454&x-signature=WH3mapmYLDYNUBoYLVXct5qPG8o%3D\",\"width\":1920,\"height\":1080,\"start\":0,\"end\":23592000}]",
+    "image_list": "[{\"image_url\":\"https://s.coze.cn/t/6zJU7Bx0YBc/\",\"transition\":\"叠化\",\"width\":1920,\"height\":1080,\"start\":0,\"end\":3048000,\"in_animation\":\"渐显\"},{\"image_url\":\"\",\"transition\":\"叠化\",\"width\":1920,\"height\":1080,\"start\":3048000,\"end\":5616000,\"in_animation\":\"向上滑动\"},{\"image_url\":\"https://s.coze.cn/t/Gag8am5VRfc/\",\"transition\":\"叠化\",\"width\":1920,\"height\":1080,\"start\":5616000,\"end\":8112000,\"in_animation\":\"向左滑动\"},{\"image_url\":\"https://s.coze.cn/t/d4EdUa-lveI/\",\"transition\":\"叠化\",\"width\":1920,\"height\":1080,\"start\":8112000,\"end\":10608000,\"in_animation\":\"向右滑动\"},{\"image_url\":\"https://s.coze.cn/t/Kw5h0a_Hcjc/\",\"transition\":\"叠化\",\"width\":1920,\"height\":1080,\"start\":10608000,\"end\":13008000,\"in_animation\":\"向上滑动\"},{\"image_url\":\"https://s.coze.cn/t/3_nWKaazYA4/\",\"transition\":\"叠化\",\"width\":1920,\"height\":1080,\"start\":13008000,\"end\":15624000,\"in_animation\":\"向右滑动\"},{\"image_url\":\"https://s.coze.cn/t/QKueQaJR3ok/\",\"transition\":\"叠化\",\"width\":1920,\"height\":1080,\"start\":15624000,\"end\":17808000,\"in_animation\":\"向左滑动\"},{\"image_url\":\"https://s.coze.cn/t/tk3nMbgwInY/\",\"transition\":\"叠化\",\"width\":1920,\"height\":1080,\"start\":17808000,\"end\":20592000,\"in_animation\":\"向左滑动\"},{\"image_url\":\"https://s.coze.cn/t/ufVdx2Ogl9U/\",\"transition\":\"叠化\",\"width\":1920,\"height\":1080,\"start\":20592000,\"end\":23592000,\"in_animation\":\"渐显\"}]",
+    "max_time": 23592000,
+    "text_cap": [
+        "Airborne? I'm 'nesting fish'",
+        "Don't be sad about no fish",
+        "Think of it as feeding fish",
+        "The bait attracts more fish",
+        "Build a fish paradise",
+        "Next time you'll catch big ones",
+        "Airborne can be proud",
+        "Change your mindset and enjoy",
+        "Follow for one fishing insight a day"
+    ],
+    "text_timelines": [
+        {
+            "end": "2915478.2608695656",
+            "start": 0
+        },
+        {
+            "end": "5483478.260869565",
+            "start": "2915478.2608695656"
+        },
+        {
+            "end": "7979478.260869565",
+            "start": "5483478.260869565"
+        },
+        {
+            "end": "10475478.260869567",
+            "start": "7979478.260869565"
+        },
+        {
+            "end": "12875478.260869567",
+            "start": "10475478.260869567"
+        },
+        {
+            "end": "15491478.260869567",
+            "start": "12875478.260869567"
+        },
+        {
+            "end": "17675478.260869568",
+            "start": "15491478.260869567"
+        },
+        {
+            "end": "20459478.260869568",
+            "start": "17675478.260869568"
+        },
+        {
+            "end": "23362704.06732118",
+            "start": "20459478.260869568"
+        }
+    ],
+    "timelines": [
+        {
+            "end": 3048000,
+            "start": 0
+        },
+        {
+            "end": 5616000,
+            "start": 3048000
+        },
+        {
+            "end": 8112000,
+            "start": 5616000
+        },
+        {
+            "end": 10608000,
+            "start": 8112000
+        },
+        {
+            "end": 13008000,
+            "start": 10608000
+        },
+        {
+            "end": 15624000,
+            "start": 13008000
+        },
+        {
+            "end": 17808000,
+            "start": 15624000
+        },
+        {
+            "end": 20592000,
+            "start": 17808000
+        },
+        {
+            "end": 23592000,
+            "start": 20592000
+        }
+    ],
+    "topic": "空军也能很骄傲: 空军？我这是在'打窝养鱼'",
+    "hook_type": "反常识",
+    "output_language": "en"
+}

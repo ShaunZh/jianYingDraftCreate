@@ -1,0 +1,105 @@
+{
+    "audio_list": "[{\"audio_url\":\"https://lf26-appstore-sign.oceancloudapi.com/ocean-cloud-tos/VolcanoUserVoice/speech_7426725529589596187_3f322622-06e2-4f55-a785-f14a442e45c2.mp3?lk3s=da27ec82&x-expires=1770713992&x-signature=l9iCYVxJl1CRYLNtciwxOja8ATU%3D\",\"duration\":2520000,\"start\":0,\"end\":2520000,\"audio_effect\":\"叠加\"},{\"audio_url\":\"https://lf9-appstore-sign.oceancloudapi.com/ocean-cloud-tos/VolcanoUserVoice/speech_7426725529589596187_72874505-8130-4dc3-aa45-847821ccda21.mp3?lk3s=da27ec82&x-expires=1770713993&x-signature=wSUcdD8xCq5ezNarkz%2FEUi5y1Dk%3D\",\"duration\":1704000,\"start\":2520000,\"end\":4224000,\"audio_effect\":\"叠加\"},{\"audio_url\":\"https://lf6-appstore-sign.oceancloudapi.com/ocean-cloud-tos/VolcanoUserVoice/speech_7426725529589596187_37ba6a26-3b96-4fb2-8878-64f0317d9ec6.mp3?lk3s=da27ec82&x-expires=1770713994&x-signature=1x%2B44fcBd4xb6%2F3b2%2FeG3KxyL7k%3D\",\"duration\":1920000,\"start\":4224000,\"end\":6144000,\"audio_effect\":\"叠加\"},{\"audio_url\":\"https://lf3-appstore-sign.oceancloudapi.com/ocean-cloud-tos/VolcanoUserVoice/speech_7426725529589596187_f9d94952-3f09-44c2-b8b0-b0a8f89ebc8f.mp3?lk3s=da27ec82&x-expires=1770713996&x-signature=oghqaa3SBR1nQCby48NvQ1yD2qU%3D\",\"duration\":2088000,\"start\":6144000,\"end\":8232000,\"audio_effect\":\"叠加\"},{\"audio_url\":\"https://lf3-appstore-sign.oceancloudapi.com/ocean-cloud-tos/VolcanoUserVoice/speech_7426725529589596187_d6526c02-f2ef-42b2-b3b4-829c3bbbba37.mp3?lk3s=da27ec82&x-expires=1770713997&x-signature=NhAg%2BEQs0oDKaIAmgVLlgu2SaDA%3D\",\"duration\":1896000,\"start\":8232000,\"end\":10128000,\"audio_effect\":\"叠加\"},{\"audio_url\":\"https://lf6-appstore-sign.oceancloudapi.com/ocean-cloud-tos/VolcanoUserVoice/speech_7426725529589596187_cf4b4e7d-eacc-40ff-b286-091dc4fd935d.mp3?lk3s=da27ec82&x-expires=1770713998&x-signature=cWsSc3GLueM8e7S337zJAFbsjqQ%3D\",\"duration\":2160000,\"start\":10128000,\"end\":12288000,\"audio_effect\":\"叠加\"},{\"audio_url\":\"https://lf6-appstore-sign.oceancloudapi.com/ocean-cloud-tos/VolcanoUserVoice/speech_7426725529589596187_2aca5f81-a4ce-46af-aa4b-2b4c73eac879.mp3?lk3s=da27ec82&x-expires=1770713999&x-signature=4EtNrul2NVYad3LouLmXygIc1Hk%3D\",\"duration\":2064000,\"start\":12288000,\"end\":14352000,\"audio_effect\":\"叠加\"},{\"audio_url\":\"https://lf3-appstore-sign.oceancloudapi.com/ocean-cloud-tos/VolcanoUserVoice/speech_7426725529589596187_b974452e-f74e-4693-a784-2c200c4a4e4b.mp3?lk3s=da27ec82&x-expires=1770714000&x-signature=nS0bo8Uq5q%2BW7KbUmJMtZwTmxMU%3D\",\"duration\":2520000,\"start\":14352000,\"end\":16872000,\"audio_effect\":\"叠加\"},{\"audio_url\":\"https://lf9-appstore-sign.oceancloudapi.com/ocean-cloud-tos/VolcanoUserVoice/speech_7426725529589596187_8da3987d-0d68-408f-b34d-7f138b712931.mp3?lk3s=da27ec82&x-expires=1770714001&x-signature=fLzv1LkJZiT2RqVdNHj8rA7wEho%3D\",\"duration\":2016000,\"start\":16872000,\"end\":18888000,\"audio_effect\":\"叠加\"},{\"audio_url\":\"https://lf26-appstore-sign.oceancloudapi.com/ocean-cloud-tos/VolcanoUserVoice/speech_7426725529589596187_ae67c154-2f5f-473e-aa25-469cbb116326.mp3?lk3s=da27ec82&x-expires=1770714002&x-signature=c8jPB6aj9DXH24GMEL3mEiJYGKA%3D\",\"duration\":2952000,\"start\":18888000,\"end\":21840000,\"audio_effect\":\"叠加\"}]",
+    "bg_image": "[{\"image_url\":\"https://p26-bot-workflow-sign.byteimg.com/tos-cn-i-mdko3gqilj/cdf63f135f47454e85f962d6dc465b9b.png~tplv-mdko3gqilj-image.png?rk3s=c8fe7ad5&x-expires=1801558792&x-signature=MhPt1iE%2BsC2GfmRUH%2F6NIneHYgg%3D\",\"width\":1920,\"height\":1080,\"start\":0,\"end\":21840000}]",
+    "image_list": "[{\"image_url\":\"https://s.coze.cn/t/O6HIBS8h2Kg/\",\"transition\":\"叠化\",\"width\":1920,\"height\":1080,\"start\":0,\"end\":2520000,\"in_animation\":\"向左滑动\"},{\"image_url\":\"https://s.coze.cn/t/7cAQbjpONso/\",\"transition\":\"叠化\",\"width\":1920,\"height\":1080,\"start\":2520000,\"end\":4224000,\"in_animation\":\"渐显\"},{\"image_url\":\"https://s.coze.cn/t/Hs-j-ArZrPw/\",\"transition\":\"叠化\",\"width\":1920,\"height\":1080,\"start\":4224000,\"end\":6144000,\"in_animation\":\"向下滑动\"},{\"image_url\":\"https://s.coze.cn/t/4joN9R-3KVE/\",\"transition\":\"叠化\",\"width\":1920,\"height\":1080,\"start\":6144000,\"end\":8232000,\"in_animation\":\"渐显\"},{\"image_url\":\"https://s.coze.cn/t/HpDAkbDnE2s/\",\"transition\":\"叠化\",\"width\":1920,\"height\":1080,\"start\":8232000,\"end\":10128000,\"in_animation\":\"向上滑动\"},{\"image_url\":\"https://s.coze.cn/t/Oh1LXYvl7ZM/\",\"transition\":\"叠化\",\"width\":1920,\"height\":1080,\"start\":10128000,\"end\":12288000,\"in_animation\":\"渐显\"},{\"image_url\":\"https://s.coze.cn/t/PhjSdHwOCTo/\",\"transition\":\"叠化\",\"width\":1920,\"height\":1080,\"start\":12288000,\"end\":14352000,\"in_animation\":\"向右滑动\"},{\"image_url\":\"https://s.coze.cn/t/ppjPJgKcmL4/\",\"transition\":\"叠化\",\"width\":1920,\"height\":1080,\"start\":14352000,\"end\":16872000,\"in_animation\":\"向下滑动\"},{\"image_url\":\"https://s.coze.cn/t/4CTM17eN5V0/\",\"transition\":\"叠化\",\"width\":1920,\"height\":1080,\"start\":16872000,\"end\":18888000,\"in_animation\":\"渐显\"},{\"image_url\":\"https://s.coze.cn/t/xz5kkYG9sow/\",\"transition\":\"叠化\",\"width\":1920,\"height\":1080,\"start\":18888000,\"end\":21840000,\"in_animation\":\"向左滑动\"}]",
+    "max_time": 21840000,
+    "text_cap": [
+        "空军也必带的3样东西",
+        "鱼护从不湿",
+        "但尊严常在",
+        "第一样：钓竿",
+        "钓鱼基本装备",
+        "第二样：鱼饵",
+        "引鱼关键所在",
+        "第三样：抄网",
+        "上鱼收鱼必备",
+        "关注我，每天一个钓鱼小知识"
+    ],
+    "text_timelines": [
+        {
+            "end": 2520000,
+            "start": 0
+        },
+        {
+            "end": 4224000,
+            "start": 2520000
+        },
+        {
+            "end": 6144000,
+            "start": 4224000
+        },
+        {
+            "end": 8232000,
+            "start": 6144000
+        },
+        {
+            "end": 10128000,
+            "start": 8232000
+        },
+        {
+            "end": 12288000,
+            "start": 10128000
+        },
+        {
+            "end": 14352000,
+            "start": 12288000
+        },
+        {
+            "end": 16872000,
+            "start": 14352000
+        },
+        {
+            "end": 18888000,
+            "start": 16872000
+        },
+        {
+            "end": 21840000,
+            "start": 18888000
+        }
+    ],
+    "timelines": [
+        {
+            "end": 2520000,
+            "start": 0
+        },
+        {
+            "end": 4224000,
+            "start": 2520000
+        },
+        {
+            "end": 6144000,
+            "start": 4224000
+        },
+        {
+            "end": 8232000,
+            "start": 6144000
+        },
+        {
+            "end": 10128000,
+            "start": 8232000
+        },
+        {
+            "end": 12288000,
+            "start": 10128000
+        },
+        {
+            "end": 14352000,
+            "start": 12288000
+        },
+        {
+            "end": 16872000,
+            "start": 14352000
+        },
+        {
+            "end": 18888000,
+            "start": 16872000
+        },
+        {
+            "end": 21840000,
+            "start": 18888000
+        }
+    ],
+    "topic": "空军也必带的3样东西",
+    "hook_type": "反常识",
+    "output_language": "zh"
+}
